@@ -1,0 +1,2 @@
+quantidade neurônios: 30
+taxa de aprendizagem: 0.00001
