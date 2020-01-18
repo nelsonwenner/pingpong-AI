@@ -16,5 +16,6 @@ def get_file(path):
     return json.load(open_path)
 
 
-def get_data(path, index):
-    return list(map(lambda data: data[index], get_file(path)))
+def get_data(path, index=0, flag=True):
+    if flag: return list(map(lambda data: data[index], get_file(path)))
+    return get_file(path)

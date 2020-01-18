@@ -54,7 +54,7 @@ class NeuralNetwork:
      
     '''
     def sigmoid(self, entry):
-        return 1 / (1 + np.exp(-entry))
+        return np.exp(np.fmin(entry, 0)) / (1 + np.exp(-np.abs(entry)))
 
     '''
      A derivada da função Sigmoid.
