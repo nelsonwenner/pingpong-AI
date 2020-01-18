@@ -4,19 +4,23 @@ from DB_PingPong import *
 
 
 class NeuralNetwork:
-    def __init__(self, quantidade_entradas, quantidade_neuronios, quantidade_saida, entradas_conjunto_treinamento, saidas_conjunto_treinamento, pesos_sinapticos_w1, pesos_sinapticos_w2, gravar_dados, epocas):
+    def __init__(self, 
+        quantidade_entradas, quantidade_neuronios, 
+        quantidade_saida, entradas_conjunto_treinamento, 
+        saidas_conjunto_treinamento, pesos_sinapticos_w1, 
+        pesos_sinapticos_w2, gravar_dados, epocas):
         self.controle_dados_RedeNeural = criando_repositorio_dados_RedeNeural()
+        self.entradas_conjunto_treinamento = entradas_conjunto_treinamento
+        self.saidas_conjunto_treinamento = saidas_conjunto_treinamento
+        self.permissao_gravar_dados = gravar_dados
         self.quantidade_entradas = quantidade_entradas
         self.quantidade_neuronios = quantidade_neuronios
         self.quantidade_saida = quantidade_saida
-        self.entradas_conjunto_treinamento = entradas_conjunto_treinamento
-        self.saidas_conjunto_treinamento = saidas_conjunto_treinamento
         self.pesos_sinapticos_w1 = pesos_sinapticos_w1
         self.pesos_sinapticos_w2 = pesos_sinapticos_w2
         self.taxa_aprendizagem = 0.00001
         self.epocas = epocas
-        self.permissao_gravar_dados = gravar_dados
-
+     
     # Verificando se existem um DB de pesos a serem utilizados, ou criamos aleatoriamente.
     def verificando_pesos(self):
         if self.pesos_sinapticos_w1 == None:
@@ -31,7 +35,7 @@ class NeuralNetwork:
 
     # Gravando pesos
     def gravando_dados_em_TXT(self):
-        if self.permissao_gravar_dados == True:
+        if self.permissao_gravar_dados:
             criar_arquivoTXT_IA("peso-w1.txt")
             criar_arquivoTXT_IA("peso-w2.txt")
             guardar_dados_arquivoTXT_IA(self.pesos_sinapticos_w1, "peso-w1.txt")
