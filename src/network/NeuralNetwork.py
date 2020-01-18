@@ -1,135 +1,178 @@
+from sys import path
+path.append('..')
+from database.controller.db import *
 import numpy as np
-from DB_RedeNeural import *
-from DB_PingPong import *
 
 
 class NeuralNetwork:
-    def __init__(self, 
-        quantidade_entradas, quantidade_neuronios, 
-        quantidade_saida, entradas_conjunto_treinamento, 
-        saidas_conjunto_treinamento, pesos_sinapticos_w1, 
-        pesos_sinapticos_w2, gravar_dados, epocas):
-        self.controle_dados_RedeNeural = criando_repositorio_dados_RedeNeural()
-        self.entradas_conjunto_treinamento = entradas_conjunto_treinamento
-        self.saidas_conjunto_treinamento = saidas_conjunto_treinamento
-        self.permissao_gravar_dados = gravar_dados
-        self.quantidade_entradas = quantidade_entradas
-        self.quantidade_neuronios = quantidade_neuronios
-        self.quantidade_saida = quantidade_saida
-        self.pesos_sinapticos_w1 = pesos_sinapticos_w1
-        self.pesos_sinapticos_w2 = pesos_sinapticos_w2
-        self.taxa_aprendizagem = 0.00001
-        self.epocas = epocas
+    def __init__(self,
+        amount_entry, amount_neurons,
+        amount_output, entry_set_training,
+        output_set_training, weight_synaptic_w1,
+        weight_synaptic_w2, permission_save, epoch):
+        self.entry_set_training = entry_set_training
+        self.output_set_training = output_set_training
+        self.permission_save = permission_save
+        self.amount_entry = amount_entry
+        self.amount_neurons = amount_neurons
+        self.amount_output = amount_output
+        self.weight_synaptic_w1 = weight_synaptic_w1
+        self.weight_synaptic_w2 = weight_synaptic_w2
+        self.rate_learning = 0.00001
+        self.epoch = epoch
+
+    '''
+    Verificando se existem um DB de pesos a serem utilizados, ou criamos aleatoriamente.
+    
+    '''
+    def checking_exists_weights(self):
+        if self.weight_synaptic_w1 == None:
+            self.weight_synaptic_w1 = 2 * np.random.random((self.amount_entry, self.amount_neurons)) - 1
+        else:
+            self.weight_synaptic_w1 = np.array(self.weight_synaptic_w1)
+
+        if self.weight_synaptic_w2 == None:
+            self.weight_synaptic_w2 = 2 * np.random.random((self.amount_neurons, self.amount_output)) - 1
+        else:
+            self.weight_synaptic_w2 = np.array(self.weight_synaptic_w2)
+
+    '''
+    Gravando pesos
+    
+    '''
+    def recording_data(self):
+        if self.permission_save:
+            create_file('/../database/weights/', 'weight-w1.txt')
+            create_file('/../database/weights/', 'weight-w2.txt')
+            save_data('/../database/weights/', self.weight_synaptic_w1, 'weight-w1.txt')
+            save_data('/../database/weights/', self.weight_synaptic_w2, 'weight-w2.txt')
+
+    '''
+     A função Sigmoide, que descreve uma curva em forma de S.
+     Nós passamos a soma ponderada das entradas através desta função para
+     normalize-os entre 0 e 1.
      
-    # Verificando se existem um DB de pesos a serem utilizados, ou criamos aleatoriamente.
-    def verificando_pesos(self):
-        if self.pesos_sinapticos_w1 == None:
-            self.pesos_sinapticos_w1 = 2 * np.random.random((self.quantidade_entradas, self.quantidade_neuronios)) - 1
-        else:
-            self.pesos_sinapticos_w1 = np.array(self.pesos_sinapticos_w1)
+    '''
+    def sigmoid(self, entry):
+        return 1 / (1 + np.exp(-entry))
 
-        if self.pesos_sinapticos_w2 == None:
-            self.pesos_sinapticos_w2 = 2 * np.random.random((self.quantidade_neuronios, self.quantidade_saida)) - 1
-        else:
-            self.pesos_sinapticos_w2 = np.array(self.pesos_sinapticos_w2)
-
-    # Gravando pesos
-    def gravando_dados_em_TXT(self):
-        if self.permissao_gravar_dados:
-            criar_arquivoTXT_IA("peso-w1.txt")
-            criar_arquivoTXT_IA("peso-w2.txt")
-            guardar_dados_arquivoTXT_IA(self.pesos_sinapticos_w1, "peso-w1.txt")
-            guardar_dados_arquivoTXT_IA(self.pesos_sinapticos_w2, "peso-w2.txt")
-
-    # A função Sigmoide, que descreve uma curva em forma de S.
-    # Nós passamos a soma ponderada das entradas através desta função para
-    # normalize-os entre 0 e 1.
-    def sigmoid(self, entrada):
-        return 1 / (1 + np.exp(-entrada))
-
-    # A derivada da função Sigmoid.
-    # Este é o gradiente da curva sigmóide.
-    # Indica que estamos confiantes sobre o peso existente.
+    '''
+     A derivada da função Sigmoid.
+     Este é o gradiente da curva sigmóide.
+     Indica que estamos confiantes sobre o peso existente.
+     
+    '''
     def sigmoid_derivada(self, sigmoid):
         return sigmoid * (1 - sigmoid)
 
-    # Somando para frente
-    def somando_para_frente(self, entrada):
-        self.resultado_soma_camada_entrada_eOCULTA = self.sigmoid(np.dot(entrada, self.pesos_sinapticos_w1))
-        self.resultado_soma_OCULTA_ecamadaSaida = self.sigmoid(np.dot(self.resultado_soma_camada_entrada_eOCULTA, self.pesos_sinapticos_w2))
+    '''
+     Somando para frente
+    '''
+    def sum_feed_forward(self, entry):
+        self.result_sum_hidden_input_layer = self.sigmoid(np.dot(entry, self.weight_synaptic_w1))
+        self.result_sum_hidden_output_layer = self.sigmoid(np.dot(self.result_sum_hidden_input_layer, self.weight_synaptic_w2))
 
-    # Delta saida
-    def delta_saida(self):
-        deltaDerivadaSaida = self.taxa_de_error_simples() * self.sigmoid_derivada(self.resultado_soma_OCULTA_ecamadaSaida)
-        return deltaDerivadaSaida
+    '''
+     Delta saida
+    
+    '''
+    def delta_output(self):
+        return self.simple_error_rate() * self.sigmoid_derivada(self.result_sum_hidden_output_layer)
 
-    # Delta camada oculta
-    def delta_camadaOculta(self):
-        deltaCamaOculta = np.dot((self.taxa_de_error_simples()) * self.sigmoid_derivada(self.resultado_soma_OCULTA_ecamadaSaida), self.pesos_sinapticos_w2.T)
-        return deltaCamaOculta
+    '''
+     Delta camada oculta
+    
+    '''
+    def delta_layer_hidden(self):
+        return np.dot((self.simple_error_rate()) * self.sigmoid_derivada(self.result_sum_hidden_output_layer), self.weight_synaptic_w2.T)
 
-    # Taxa simples de error
-    def taxa_de_error_simples(self):
-        return self.saidas_conjunto_treinamento - self.resultado_soma_OCULTA_ecamadaSaida
+    '''
+     Taxa simples de error
+    
+    '''
+    def simple_error_rate(self):
+        return self.output_set_training - self.result_sum_hidden_output_layer
 
-    # Propagando o ajuste de pesos
-    def Backpropagation(self, camadaEntrada):
-        ajustar_peso_w1 = np.dot(camadaEntrada.T, (self.delta_camadaOculta() * self.sigmoid_derivada(self.resultado_soma_camada_entrada_eOCULTA)))
-        self.pesos_sinapticos_w1 += (ajustar_peso_w1 * self.taxa_aprendizagem)
+    '''
+     Propagando o ajuste de pesos
+    
+    '''
+    def backpropagation(self, input_layer):
+        adjust_weight_w1 = np.dot(input_layer.T, (self.delta_layer_hidden() * self.sigmoid_derivada(self.result_sum_hidden_input_layer)))
+        self.weight_synaptic_w1 += (adjust_weight_w1 * self.rate_learning)
 
-        ajustar_peso_w2 = np.dot(self.resultado_soma_camada_entrada_eOCULTA.T, self.delta_saida())
-        self.pesos_sinapticos_w2 += (ajustar_peso_w2 * self.taxa_aprendizagem)
+        adjust_weight_w2 = np.dot(self.result_sum_hidden_input_layer.T, self.delta_output())
+        self.weight_synaptic_w2 += (adjust_weight_w2 * self.rate_learning)
 
-    # Metodo para ser usado no jogo, para calcular o DB
-    # para que possa resultar se a barrinha vai pra esquerda
-    # ou vai para direita de acordo com a condição  se
-    # resultado < 0.5 vai ser igual a 0 e a barrinha vai para esquerda
-    # se for maior que 0.5 que no caso é 50% vai para a direita.
-    def resultado_saida(self, entrada):
-        self.somando_para_frente(entrada)
-        return self.resultado_soma_OCULTA_ecamadaSaida
+    '''
+     Metodo para ser usado no jogo, para calcular o DB
+     para que possa resultar se a barrinha vai pra esquerda
+     ou vai para direita de acordo com a condição  se
+     resultado < 0.5 vai ser igual a 0 e a barrinha vai para esquerda
+     se for maior que 0.5 que no caso é 50% vai para a direita.
+    
+    '''
+    def result_output(self, entry):
+        self.sum_feed_forward(entry)
+        return self.result_sum_hidden_output_layer
 
-    # Nós treinamos a rede neural através de um processo de tentativa e erro.
-    # Ajustando os pesos sinápticos a cada vez.
-    def treinamento(self):
+    '''
+     Nós treinamos a rede neural através de um processo de tentativa e erro.
+     Ajustando os pesos sinápticos a cada vez.
+    
+    '''
+    def training(self):
 
-        # instancie o conjunto de treinamento através da nossa rede neural.
-        camadaEntrada = self.entradas_conjunto_treinamento
-        self.somando_para_frente(camadaEntrada)
+        '''
+         instancie o conjunto de treinamento através da nossa rede neural.
 
-        # Error da rede neural, metodos Mean square error (MSE)
-        self.error = np.sum((self.saidas_conjunto_treinamento - self.resultado_soma_OCULTA_ecamadaSaida) ** 2) / len(self.entradas_conjunto_treinamento)
+        '''
+        input_layer = self.entry_set_training
+        self.sum_feed_forward(input_layer)
 
-        # Media do error.
-        self.media_error = np.mean(np.abs(self.error))
+        '''
+         Error da rede neural, metodos Mean square error (MSE)
+        
+        '''
+        self.error = np.sum((self.output_set_training - self.result_sum_hidden_output_layer) ** 2) / len(self.entry_set_training)
 
-        # Ajustando os pesos de acordo com o error da rede.
-        self.Backpropagation(camadaEntrada)
+        '''
+         Media do error.
+        
+        '''
+        self.mean_error = np.mean(np.abs(self.error))
 
-        self.gravando_dados_em_TXT()
+        '''
+         Ajustando os pesos de acordo com o error da rede.
+        
+        '''
+        self.backpropagation(input_layer)
 
-        print("Media error: {:.2f} %".format(self.media_error))
+        self.recording_data()
+
+        print("Mean error: {:.2f} %".format(self.mean_error))
 
 
 if __name__ == '__main__':
 
-    input = np.array(input("dados-55.txt"))
-    output = np.array(output("dados-55.txt"))
+    input = np.array(get_data('/../database/data/data-94.txt', 0))
+    output = np.array(get_data('/../database/data/data-94.txt', 1))
 
     w1 = None
 
     w2 = None
 
-    salvar_pesos = False
+    save_weights = True
 
-    IA = NeuralNetwork(2, 30, 1, input, output, w1, w2, salvar_pesos, 100000)
+    IA = NeuralNetwork(2, 30, 1, input, output, w1, w2, save_weights, 100000)
 
-    IA.verificando_pesos()
+    IA.checking_exists_weights()
 
     cont = 0
 
-    while cont < IA.epocas:
+    while cont < IA.epoch:
 
-        IA.treinamento()
+        IA.training()
 
         cont += 1
+    

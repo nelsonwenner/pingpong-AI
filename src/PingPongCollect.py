@@ -4,7 +4,7 @@ from random import randint
 import pygame
 
 
-class Pingpong:
+class PingPongCollect:
 
     color_white = (255, 255, 255)
     color_black = (0, 0, 0)
@@ -19,7 +19,8 @@ class Pingpong:
     ball_y = 0
     ball_height = 20
     ball_width = 20
-
+    ball_velocity = 10
+    
     learning_data = []
    
     side_ball = None
@@ -38,8 +39,8 @@ class Pingpong:
             try:
                 for event in pygame.event.get():
                     if event.type == QUIT:
-                        create_file(self.name_file_data, '/')
-                        save_data(self.learning_data, self.name_file_data, '/')
+                        create_file('/database/data/', self.name_file_data)
+                        save_data('/database/data/', self.learning_data, self.name_file_data)
                         self.exit = True
 
                     if event.type == KEYDOWN:  # Escutando teclado
@@ -51,10 +52,12 @@ class Pingpong:
                 self.movement(self.activate)
                 self.get_side_ball()
 
-                self.learning_data.append({
-                'ball_x': self.ball_x, 
-                'pallet_x': self.pallet_x + self.pallet_width // 2, 
-                'side_ball': self.side_ball})
+                '''
+                index: 0 = ball_x, pallet_x
+                index: 1 = side_ball
+
+                '''
+                self.learning_data.append([[self.ball_x, self.pallet_x + self.pallet_width // 2], [self.side_ball]])
 
             except Exception:
                 continue
@@ -78,8 +81,8 @@ class Pingpong:
 
     def loop_ball(self):
         if self.ball_y >= 593:
-            create_file(self.name_file_data)
-            save_data(self.learning_data, self.name_file_data)
+            create_file('/database/data/', self.name_file_data)
+            save_data('/database/data/', self.learning_data, self.name_file_data)
             self.exit = True
 
     def prevent_sides(self):
@@ -110,7 +113,7 @@ class Pingpong:
         self.prevent_sides()
         self.collision()
         self.pallet()
-        self.ball_y += self.pallet_velocity
+        self.ball_y += self.ball_velocity
         self.loop_ball()
         self.ball()
         self.frame.tick(15)
@@ -118,4 +121,4 @@ class Pingpong:
 
 
 if __name__ == '__main__':
-    Pingpong().running()
+    PingPongCollect().running()
