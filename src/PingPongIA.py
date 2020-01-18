@@ -83,7 +83,7 @@ class Pingpong:
 
         self.screen.fill(self.color_black)
         self.expert()
-        self.counter("PLACAR: ", self.count_score, 410, 580, 505, 579)
+        self.counter("SCORE: ", self.count_score, 410, 580, 505, 579)
         self.loop_ball()
         self.ball_y += self.ball_velocity
         self.prevent_sides()
