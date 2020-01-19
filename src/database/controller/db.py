@@ -6,10 +6,11 @@ def create_file(path, name_file):
     return open(custom_path, "w")
 
 
-def save_data(path, data, name_file):
+def save_data(path, data, name_file, flag=False):
     custom_path = open("{}{}{}".format(os.getcwd(), path, name_file), "w")
-    with custom_path as out: json.dump(data.tolist(), out)
-       
+    with custom_path as out:
+        if flag: return json.dump(data.tolist(), out)
+        return json.dump(data, out)
 
 def get_file(path):
     open_path = open("{}{}".format(os.getcwd(), path))

@@ -44,8 +44,8 @@ class NeuralNetwork:
         if self.permission_save:
             create_file('/../database/weights/', 'weight-w1.txt')
             create_file('/../database/weights/', 'weight-w2.txt')
-            save_data('/../database/weights/', self.weight_synaptic_w1, 'weight-w1.txt')
-            save_data('/../database/weights/', self.weight_synaptic_w2, 'weight-w2.txt')
+            save_data('/../database/weights/', self.weight_synaptic_w1, 'weight-w1.txt', flag=True)
+            save_data('/../database/weights/', self.weight_synaptic_w2, 'weight-w2.txt', flag=True)
 
     '''
      A função Sigmoide, que descreve uma curva em forma de S.
@@ -155,8 +155,8 @@ class NeuralNetwork:
 
 if __name__ == '__main__':
 
-    input = np.array(get_data('/../database/data/data-94.txt', 0))
-    output = np.array(get_data('/../database/data/data-94.txt', 1))
+    input = np.array(get_data('/../database/data/data-50.txt', 0))
+    output = np.array(get_data('/../database/data/data-50.txt', 1))
 
     w1 = None
 
@@ -173,6 +173,6 @@ if __name__ == '__main__':
     while cont < IA.epoch:
 
         IA.training()
-
+        
         cont += 1
     
