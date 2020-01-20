@@ -32,7 +32,7 @@ class Pingpong:
     expert_activate = False
 
     fps = 27
-
+    
     x_change = random.randint(10, 13)
     y_change = random.randint(10, 13)
 
